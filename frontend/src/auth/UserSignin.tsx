@@ -1,0 +1,133 @@
+import { useContext, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
+import { StudentContext } from "../component/StudentContext"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { User, Lock, Loader2 } from "lucide-react"
+import { Eye } from 'lucide-react';
+import { EyeOff } from 'lucide-react';
+import { API_URL } from "@/config/env";
+
+
+export default function Signin() {
+  const studentContext = useContext(StudentContext)
+  const navigate = useNavigate()
+
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [type, setType] = useState('password')
+  const handleSignIn = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${API_URL}/api/v1/user/signin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identifire: identifier, password }),
+        credentials: "include",
+      })
+
+      const data = await res.json()
+      studentContext?.setStudentId(data.studentId)
+      localStorage.setItem("StudentID", data.studentId)
+      localStorage.setItem("StudentEmail", data.email)
+      localStorage.setItem("StudentUsername", data.username)
+
+      if (res.ok) {
+        alert("Signin successful ✅")
+        navigate("/dashboard")
+      } else {
+        alert(data.msg || "Signin failed ❌")
+      }
+    } catch (e) {
+      console.log("Api url: ",API_URL)
+      console.error(e)
+      alert("Error during signin")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div
+      className="relative w-full min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat px-4"
+      style={{ backgroundImage: "url('/login.webp')" }}
+    >
+      <div className="absolute inset-0 bg-white/70 backdrop-blur-[1px]" />
+      <Link
+        to="/"
+        className="absolute left-4 top-4 z-20 flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+      >
+        ← Home
+      </Link>
+      <Card className="relative z-10 w-full max-w-md shadow-lg border border-gray-200">
+        <CardHeader>
+          <CardTitle className="text-2xl text-center font-semibold text-gray-800">
+            Welcome Back 👋
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="identifier">Username or Email</Label>
+            <div className="relative">
+              <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" /> 
+              <Input
+                id="identifier"
+                type="text"
+                placeholder="Enter your username or email"
+                className="pl-10"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-500" />
+              {type === "password" ? <Eye onClick={() => setType("text")} className="absolute right-3 top-2.5 h-5 w-5 text-gray-500" />
+                : <EyeOff onClick={() => setType("password")} className="absolute right-3 top-2.5 h-5 w-5 text-gray-500" />}
+              <Input
+                id="password"
+                type={type}
+                placeholder="••••••••"
+                className="pl-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+
+              />
+            </div>
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex flex-col gap-2">
+          <Button
+            onClick={handleSignIn}
+            className="w-full"
+            disabled={loading || !identifier || !password}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-4 w-4" /> Signing in...
+              </>
+            ) : (
+              "Sign In"
+            )}
+          </Button>
+
+          <Button
+            variant="link"
+            className="text-blue-600 hover:text-blue-800"
+            onClick={() => navigate("/signup")}
+          >
+            Don’t have an account? Register
+          </Button>
+        </CardFooter>
+      </Card>
+    </div>
+  )
+}
