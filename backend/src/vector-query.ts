@@ -31,12 +31,8 @@ async function run(prompt:string) {
         ];
 
         const result = collection.aggregate(pipeline);
-
         for await (const doc of result) {
-            console.log("doc: ",doc);
         }
-        
     } finally {
-        console.log("finally ")
     }
 }

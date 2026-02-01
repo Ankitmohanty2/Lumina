@@ -19,15 +19,12 @@ declare global {
 
 export const userMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
-  const token = req.cookies.token; 
-  console.log("Token: ",token)
+  const token = req.cookies.token;
   if (!token) return res.status(401).json({ message: "No token provided " });
 
   try {
     const decoded = jwt.verify(token as string, JWT_USER) as { id: string };
-    console.log("Decoded is :" , decoded)
     req.userId = decoded.id;
-    console.log("cookies: ", token)
     next();
   }
   catch (e) {

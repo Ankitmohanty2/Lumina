@@ -10,13 +10,8 @@ async function getQuote(){
             }
         })
         const data = await res.json();
-
-        const a = data.map((item:any)=>item.quote)
-        console.log(data)
-        console.log(a)
     }
-    catch(e){
-        console.log("Error in catch: ",e)
+    catch{
     }
 }
 getQuote();

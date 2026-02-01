@@ -30,9 +30,6 @@ app.use('/api/v1/admin' , adminRouter);
 
 
 app.listen(PORT, () => {
-  
-  console.log(`Server running on port ${PORT}`);
-
 });
 
 

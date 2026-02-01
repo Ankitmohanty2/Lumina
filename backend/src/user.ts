@@ -40,9 +40,7 @@ const transporter = hasSmtpCreds
     : null;
 
 if (transporter) {
-    transporter.verify().then(() => console.log("SMTP ready")).catch((e) => console.warn("SMTP verify failed:", e));
-} else {
-    console.warn("SMTP skipped: set EMAIL and PASS in .env to enable signup emails.");
+    transporter.verify().then(() => {}).catch(() => {});
 }
 
 
@@ -85,7 +83,6 @@ userRouter.post('/signup', async (req: Request, res: Response) => {
             msg: "user already exists",
 
         })
-        console.log("error is --: ", e)
     }
 
     if (transporter) {
@@ -95,8 +92,6 @@ userRouter.post('/signup', async (req: Request, res: Response) => {
             subject: "Verify your Email",
             text: `Your OTP is ${otp}`
         });
-    } else {
-        console.warn("Signup OTP not emailed (SMTP not configured):", otp);
     }
 
     res.status(200).json({
@@ -187,7 +182,6 @@ userRouter.post('/signin', async (req: Request, res: Response) => {
             sameSite: "none",
             maxAge: 1000 * 60 * 60 * 24
         })
-        console.log("cookie: ", token)
         res.json({ studentId: user._id , email : user.email , username:user.username} );
     }
     else {
@@ -199,9 +193,6 @@ userRouter.post('/signin', async (req: Request, res: Response) => {
 
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-console.log(GEMINI_API_KEY)
-const a = process.env.GEMINI_API_KEY;
-console.log(a)
 userRouter.post("/gemini", async (req, res) => {
     try {
         const { prompt } = req.body;
@@ -219,11 +210,8 @@ userRouter.post("/gemini", async (req, res) => {
         );
 
         const data = await response.json();
-        console.log(data);
-
         res.json({ text: data.candidates[0].content.parts[0].text });
     } catch (err) {
-        console.error(err);
         res.status(500).json({ error: "Something went wrong" });
     }
 });
@@ -244,7 +232,6 @@ userRouter.post('/attempt/question', userMiddleware, async (req, res) => {
     const parseData = requireBody.safeParse(req.body);
 
     if (!parseData.success) {
-        console.log(parseData.error)
         return res.status(400).json({ msg: "Invaild cred" });
 
     }
@@ -281,7 +268,6 @@ userRouter.post("/todo", userMiddleware, async (req, res) => {
     const parseData = requireBody.safeParse(req.body);
 
     if (!parseData.success) {
-        console.log(parseData.error)
         return res.status(400).json({ msg: "Invaild cred" });
 
     }
@@ -295,7 +281,6 @@ userRouter.post("/todo", userMiddleware, async (req, res) => {
             msg: "todo created"
         })
     } catch (e: any) {
-        console.log(e)
         res.status(400).json({
             msg: "error" + e.message
         })
@@ -310,7 +295,6 @@ userRouter.post("/notes", userMiddleware, async (req, res) => {
     const parseData = requireBody.safeParse(req.body);
 
     if (!parseData.success) {
-        console.log(parseData.error)
         return res.status(400).json({ msg: "Invaild cred" });
 
     }
@@ -354,10 +338,8 @@ userRouter.get('/todo', userMiddleware, async (req: Request, res: Response) => {
 
             { $sort: { _id: 1 } }
         ])
-        console.log(response);
         res.status(200).json(response)
     } catch (e) {
-        console.log(e)
         res.status(400).json("Todo not found: " + e)
     }
 })
@@ -418,8 +400,6 @@ userRouter.put("/todo/:id", userMiddleware, async (req, res) => {
         if (!updateData) {
             res.status(400).json({ msg: "todo not found " })
         }
-        console.log(updateData)
-        console.log(todo)
         res.status(200).json({ msg: "todo update sucessfully", updateData });
 
     } catch (e) {
@@ -439,7 +419,6 @@ userRouter.get('/question', userMiddleware, async (req: Request, res: Response) 
                 msg: "Questions not found"
             })
         }
-        console.log(importQuestions)
         res.status(200).json({
             importQuestions
         })
@@ -455,7 +434,6 @@ userRouter.get('/questions', userMiddleware, async (req: Request, res: Response)
                 msg: "Questions not found"
             })
         }
-        console.log(importQuestions)
         res.status(200).json({
             importQuestions
         })
@@ -474,7 +452,6 @@ userRouter.get("/stream", async (req, res) => {
     const prompt = req.query.prompt as string;
     const fileUrl = req.query.fileUrl as string;
     const isAnlyze = req.query.isAnlyze === "true";
-    console.log("isAnlyze :", isAnlyze)
 
     if (!prompt) {
         res.write(`event: error\ndata: ${JSON.stringify({ error: "Prompt missing" })}\n\n`);
@@ -512,7 +489,6 @@ userRouter.get("/stream", async (req, res) => {
             for await (const doc of result) {
                 solvedQUestionData.push("Question: " + doc.question + ". student ans: " + doc.answer)
             }
-            console.log("Solved question ", solvedQUestionData)
 
             const rag = `
 The user asked the following question:
@@ -533,17 +509,13 @@ Your task:
 
 Now generate the best possible explanation.
 `;
-            console.log("Rag: ", rag)
             await callGeminiStream(rag, fileUrl, res);
         }
         else {
-            console.log("In the else ")
-            console.log(fileUrl)
             await callGeminiStream(prompt, fileUrl, res);
         }
     }
     catch (e) {
-        console.log("error in catch: ", e)
     }
 
 });
@@ -555,7 +527,6 @@ userRouter.post('/create/conversationId', userMiddleware, async (req: Request, r
         })
         res.status(200).json(conversation._id)
     } catch (e) {
-        console.log("Error in create convestaion id: ", e)
     }
 
 })
@@ -681,7 +652,6 @@ userRouter.put('/update/convesationId:conversationId', async function (req: Requ
             res.write('event: done\ndata: {}\n\n');
             res.end();
         } catch (error) {
-            console.error('Error in /chat:', error);
             res.write(`data: ${JSON.stringify({ error: 'An error occurred' })}\n\n`);
             res.end();
         }
@@ -689,7 +659,6 @@ userRouter.put('/update/convesationId:conversationId', async function (req: Requ
     userRouter.post('/add/bookmark/question/:questionId', userMiddleware, async (req: Request, res: Response) => {
         const student = req.userId;
         const questionId = req.params.questionId;
-        console.log("Student: ", student)
         const requireBody = z.object({
             student: z.string(),
             questionId: z.string()
@@ -787,7 +756,6 @@ userRouter.put('/update/convesationId:conversationId', async function (req: Requ
 
             res.json(result);
         } catch (err) {
-            console.error(err);
             res.status(500).json({ error: "Server error" });
         }
     });
@@ -822,11 +790,8 @@ userRouter.put('/update/convesationId:conversationId', async function (req: Requ
                 .getPublicUrl(data.path);
 
             const imageUrl = publicUrlData.publicUrl;
-            console.log(" Image uploaded:", imageUrl);
-
             res.json({ success: true, imageUrl });
         } catch (err) {
-            console.error(" Upload error:", err);
             res.status(500).json({ success: false, message: "Upload failed" });
         }
     })

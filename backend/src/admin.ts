@@ -44,7 +44,6 @@ adminRouter.post('/signup', async (req: Request, res: Response) => {
     res.status(403).json({
       msg: "user already exists",
     })
-    console.log("error is --: ", e);
   }
   res.status(200).json({
     msg: "User created successfully!"
@@ -92,7 +91,6 @@ adminRouter.post('/signin', async (req: Request, res: Response) => {
       maxAge: 24 * 60 * 60 * 1000
     });
 
-    console.log(token)
     res.status(200).json({
       token: token
     })
@@ -176,7 +174,6 @@ adminRouter.put("/question/:id", adminMiddleware, async (req, res) => {
       data: updatedQuestion
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
@@ -195,7 +192,6 @@ adminRouter.delete("/question/:id", adminMiddleware, async (req, res) => {
 
     });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });

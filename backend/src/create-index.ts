@@ -20,14 +20,8 @@
             }
         }
 
-        const result = await attemtQuestionsModel.createSearchIndex(index);
-        
-
-        console.log("result ",result);
-    
-
+        await attemtQuestionsModel.createSearchIndex(index);
     } catch(e){
-        console.log(e)
     }
     }
     run().catch(console.dir);

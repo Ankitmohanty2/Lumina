@@ -7,9 +7,6 @@ async function run() {
          await connectDB();
         const batchSize = 2;
         const documents = await attemtQuestionsModel.find({ embedding: { $exists: false } }).limit(batchSize);
-
-        console.log(`Processing ${documents.length} questions...`);
-
         const updateDocuments: any[] = [];
 
         await Promise.all(
@@ -27,21 +24,15 @@ async function run() {
                         },
                     });
                 } catch (err: any) {
-                    console.log(` Embedding failed for ${doc._id}: ${err.message}`);
                 }
             })
         );
 
         if (updateDocuments.length > 0) {
             const collection = attemtQuestionsModel.collection;
-            const result = await collection.bulkWrite(updateDocuments, { ordered: false });
-            console.log(" Documents updated:", result.modifiedCount);
-        } else {
-            console.log("No documents to update.");
+            await collection.bulkWrite(updateDocuments, { ordered: false });
         }
-
     } catch (err: any) {
-        console.error("Main error:", err.stack);
     }
 }
 

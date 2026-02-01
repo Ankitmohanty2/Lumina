@@ -12,9 +12,7 @@ if(!MONGO_URL){
 export  const  connectDB = async () =>{
     try{
         await mongoose.connect(MONGO_URL)
-        console.log("✅ MongoDB Connected Successfully");
     }catch(err){
-        console.error('mongo db connection failed \n', err)
         process.exit(1);
     }
 
