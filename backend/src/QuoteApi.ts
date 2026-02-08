@@ -12,6 +12,7 @@ async function getQuote(){
         const data = await res.json();
     }
     catch{
+        
     }
 }
 getQuote();
